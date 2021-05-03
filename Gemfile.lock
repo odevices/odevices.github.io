@@ -262,6 +262,7 @@ PLATFORMS
 
 DEPENDENCIES
   github-pages (~> 214)
+  jemoji
   minima (~> 2.5)
 
 BUNDLED WITH

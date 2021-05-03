@@ -16,6 +16,7 @@ gem "github-pages", "~> 214", group: :jekyll_plugins
 
 group :jekyll_plugins do
   # If you have any plugins, put them here!
+  gem "jemoji"
 end
 
 
