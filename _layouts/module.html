@@ -1,8 +1,9 @@
 ---
 layout: default
 ---
-
-<img src="{{ page.image | relative_url }}">
+<a href="{{ page.image_link | relative_url }}">
+  <img src="{{ page.image | relative_url }}">
+</a>
 
 <div style="max-width:20cm">
   {{ content }}
