@@ -2,8 +2,15 @@
 layout: default
 ---
 <a href="{{ page.image_link | relative_url }}">
-  <img src="{{ page.image | relative_url }}" style="cursor: zoom-in;">
+  <img src="{{ page.image | relative_url }}" style="cursor: zoom-in; margin-bottom: 20px;">
 </a>
+
+<h2>{{page.code}} {{page.name}}</h2>
+<div style="margin-top: 10px; margin-bottom: 10px;">
+  <hr>
+  <a href="{{ page.docs }}">DOCS</a> | <a href="{{ page.changelog }}">CHANGELOG</a>
+  <hr>
+</div>
 
 <div style="max-width:20cm">
   {{ content }}
