@@ -1,0 +1,42 @@
+---
+layout: default
+---
+
+<script src="api.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div class="cart-tab">
+  <a href="checkout.html">
+    <i class="fa" style="font-size:36px;user-select:none;">&#xf07a;</i>
+    <span class='cart-count'>0</span>
+  </a>
+</div>
+
+<div style="max-width:1000px;margin:auto;">
+
+  <div class="product-group">
+    {% include product.html product="er-101-n" %}
+    {% include product.html product="er-101-of" %}
+    {% include product.html product="er-101-pc" %}
+  </div>
+
+  <div class="product-group">
+    {% include product.html product="er-102-n" %}
+    {% include product.html product="er-102-of" %}
+    {% include product.html product="er-102-pc" %}
+  </div>
+
+  <div class="product-group">
+    {% include product.html product="er-301-n" %}
+    {% include product.html product="er-301-of" %}
+    {% include product.html product="er-301-pc" %}
+  </div>
+
+</div>
+
+<div class="action-tab">
+  <button id="clear" type="submit">Clear Cart</button><br>
+  <button id="next" type="submit">Next</button>
+</div>
+
+<script src="store.js"></script>

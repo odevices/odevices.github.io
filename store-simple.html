@@ -1,0 +1,95 @@
+---
+layout: default
+---
+
+<div id="smart-button-container">
+  <div style="text-align: center;">
+    <div style="margin-bottom: 1.25rem;">
+      <p>ER-301: Sound Computer</p>
+      <select id="item-options">
+        <option value="Nostalgia" price="96000">Nostalgia - 96000 JPY</option>
+        <option value="Original Flavor" price="96000">Original Flavor - 96000 JPY</option>
+        <option value="People's Choice" price="96000">People's Choice - 96000 JPY</option>
+      </select>
+    </div>
+    <div id="paypal-button-container"></div>
+  </div>
+</div>
+<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=JPY"
+  data-sdk-integration-source="button-factory"></script>
+<script>
+  function initPayPalButton() {
+    var shipping = 0;
+    var itemOptions = document.querySelector("#smart-button-container #item-options");
+    var orderDescription = 'ER-301: Sound Computer';
+    if (orderDescription === '') {
+      orderDescription = 'Item';
+    }
+    paypal.Buttons({
+      style: {
+        shape: 'pill',
+        color: 'gold',
+        layout: 'vertical',
+        label: 'pay',
+
+      },
+      createOrder: function (data, actions) {
+        var selectedItemDescription = itemOptions.options[itemOptions.selectedIndex].value;
+        var selectedItemPrice = parseFloat(itemOptions.options[itemOptions.selectedIndex].getAttribute("price"));
+        var tax = (0 === 0) ? 0 : (selectedItemPrice * (parseFloat(0) / 100));
+        if (quantitySelect.options.length > 0) {
+          quantity = parseInt(quantitySelect.options[quantitySelect.selectedIndex].value);
+        } else {
+          quantity = 1;
+        }
+
+        tax *= quantity;
+        tax = Math.round(tax * 100) / 100;
+        var priceTotal = quantity * selectedItemPrice + parseFloat(shipping) + tax;
+        priceTotal = Math.round(priceTotal * 100) / 100;
+        var itemTotalValue = Math.round((selectedItemPrice * quantity) * 100) / 100;
+
+        return actions.order.create({
+          purchase_units: [{
+            description: orderDescription,
+            amount: {
+              currency_code: 'JPY',
+              value: priceTotal,
+              breakdown: {
+                item_total: {
+                  currency_code: 'JPY',
+                  value: itemTotalValue,
+                },
+                shipping: {
+                  currency_code: 'JPY',
+                  value: shipping,
+                },
+                tax_total: {
+                  currency_code: 'JPY',
+                  value: tax,
+                }
+              }
+            },
+            items: [{
+              name: selectedItemDescription,
+              unit_amount: {
+                currency_code: 'JPY',
+                value: selectedItemPrice,
+              },
+              quantity: quantity
+            }]
+          }]
+        });
+      },
+      onApprove: function (data, actions) {
+        return actions.order.capture().then(function (details) {
+          alert('Transaction completed by ' + details.payer.name.given_name + '!');
+        });
+      },
+      onError: function (err) {
+        console.log(err);
+      },
+    }).render('#paypal-button-container');
+  }
+  initPayPalButton();
+</script>

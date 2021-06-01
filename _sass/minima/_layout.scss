@@ -12,6 +12,7 @@
   width: 100%;
   top: 0px;
   //height: 85px;
+  z-index: 99;
 }
 
 .site-title {
@@ -31,6 +32,7 @@
 .site-nav {
   float: right;
   line-height: $base-line-height * $base-font-size * 2.25;
+  z-index: 100;
 
   .nav-trigger {
       display: none;
