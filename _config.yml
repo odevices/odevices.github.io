@@ -54,7 +54,7 @@ plugins:
 #   - vendor/ruby/
 exclude: 
   - notes.md
-  - store.html
+  - store-closed.html
 
 collections:
   modules:

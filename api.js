@@ -126,15 +126,15 @@ function onPrices(data, after) {
 }
 
 function refreshInventory(after) {
-  fetch('https://api.orthogonaldevices.com/inventory')
-    //fetch('http://localhost:5000/inventory')
+  fetch('https://api.orthogonaldevices.com/stock')
+    //fetch('http://localhost:5000/stock')
     .then(response => response.json())
     .then(data => onInventory(data, after));
 }
 
 function refreshPrices(after) {
-  fetch('https://api.orthogonaldevices.com/prices')
-    //fetch('http://localhost:5000/prices')
+  //fetch('https://api.orthogonaldevices.com/prices')
+  fetch('http://localhost:5000/prices')
     .then(response => response.json())
     .then(data => onPrices(data, after));
 }
