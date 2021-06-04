@@ -3,6 +3,11 @@
   margin:auto;
 }
 
+.store-content {
+  max-width:800px;
+  margin:auto;
+}
+
 .product-group {
   display:flex;
   flex-wrap:wrap;
@@ -216,6 +221,10 @@ button:hover:active {
   background-color: rgb(177, 176, 176);
 }
 
+#receipt {
+  visibility: hidden;
+}
+
 #receipt-table {
   width: 100%;
 }
@@ -241,4 +250,8 @@ button:hover:active {
 
 #receipt-table td:nth-child(2) {
   text-align: center;
+}
+
+#store-news {
+  text-align: left;
 }

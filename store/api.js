@@ -1,3 +1,18 @@
+
+console.log("Hostname:", window.location.hostname);
+var testMode = window.location.hostname != "orthogonaldevices.com";
+if(testMode)
+{
+  console.log("TEST MODE: active");
+}
+
+var apiHost = "https://api.orthogonaldevices.com";
+if(testMode)
+{
+  console.log("TEST MODE: using local apiHost");
+  apiHost = "http://localhost:5000";
+}
+
 var apiCache = {
   inventory: null,
   prices: {
@@ -100,7 +115,7 @@ function sellCart() {
   }
 
   cart.items.forEach(p => {
-    fetch('https://api.orthogonaldevices.com/sell/' + p)
+    fetch('/sell/' + p)
       //fetch('http://localhost:5000/sell/'+p)
       .then(response => console.log('sell', p, response));
   });
@@ -126,15 +141,13 @@ function onPrices(data, after) {
 }
 
 function refreshInventory(after) {
-  fetch('https://api.orthogonaldevices.com/stock')
-    //fetch('http://localhost:5000/stock')
+  fetch(apiHost+'/stock')
     .then(response => response.json())
     .then(data => onInventory(data, after));
 }
 
 function refreshPrices(after) {
-  //fetch('https://api.orthogonaldevices.com/prices')
-  fetch('http://localhost:5000/prices')
+  fetch(apiHost+'/prices')
     .then(response => response.json())
     .then(data => onPrices(data, after));
 }

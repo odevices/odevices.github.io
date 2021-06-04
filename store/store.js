@@ -71,7 +71,7 @@ function initStore() {
 
   let nextButton = document.querySelector("#next");
   nextButton.addEventListener("click", event => {
-    window.location.href = "checkout.html";
+    window.location.href = "cart.html";
   });
 
   let elts = document.querySelectorAll(".product")
@@ -82,7 +82,7 @@ function initStore() {
     let name = e.querySelector(".product-name");
     let image = e.querySelector('.product-image')
     name.innerHTML = product.toUpperCase();
-    image.setAttribute("src","images/store/"+product+".png");
+    image.setAttribute("src","/images/store/"+product+".png");
     priceDiv.innerHTML = "";
     button.disabled = true;
     button.innerHTML = "Checking...";

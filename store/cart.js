@@ -148,9 +148,9 @@ function generateTable(table, fields, records) {
       let product = record["Item"].toLowerCase();
       btn.addEventListener("click", event => {
         if (removeFromCart(product) == 0) {
-          window.location.href = "store.html";
+          window.location.href = "/store";
         } else {
-          renderCheckout();
+          renderCart();
         }
       });
       cell.appendChild(btn);
@@ -158,7 +158,7 @@ function generateTable(table, fields, records) {
   }
 }
 
-function renderCheckout() {
+function renderCart() {
   let cart = getCart();
   let table = document.querySelector(".cart-table");
 
@@ -194,15 +194,15 @@ function renderCheckout() {
   }
 }
 
-function initCheckout() {
+function initCart() {
   if (isCartEmpty()) {
-    window.location.href = "store.html";
+    window.location.href = "/store";
     return;
   }
-  renderCheckout();
-  refreshInventory(renderCheckout);
+  renderCart();
+  refreshInventory(renderCart);
 }
 
-initCheckout();
+initCart();
 
 

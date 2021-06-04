@@ -1,0 +1,17 @@
+---
+layout: default
+---
+
+<div class="home">
+
+  {%- if site.modules.size > 0 -%}
+  <div>
+  {%- for module in site.modules -%}
+  <a href="{{ module.url | relative_url }}">
+    <img style="margin:5px" src="{{ module.image | relative_url }}">
+  </a>
+  {%- endfor -%}
+  </div>
+  {%- endif -%}
+
+</div>

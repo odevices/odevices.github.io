@@ -1,17 +1,15 @@
 ---
-layout: default
+layout: top
 ---
+<pre style="background-color: white;border:0px;">
+├── <a class="page-link" href="/about">About</a>
+├── <a class="page-link" href="https://docs.orthogonaldevices.com">Docs</a>
+├── <a class="page-link" href="https://forum.orthogonaldevices.com">Forum</a>
+├── <a class="page-link" href="/modules">Modules</a>
+│   ├── <a class="page-link" href="/modules/er-101">ER-101</a>
+│   ├── <a class="page-link" href="/modules/er-102">ER-102</a>
+│   └── <a class="page-link" href="/modules/er-301">ER-301</a>
+├── <a class="page-link" href="https://www.twitter.com/odevices">News</a>
+└── <a class="page-link" href="/store">Store</a>
+</pre>
 
-<div class="home">
-
-  {%- if site.modules.size > 0 -%}
-  <div>
-  {%- for module in site.modules -%}
-  <a href="{{ module.url | relative_url }}">
-    <img style="margin:5px" src="{{ module.image | relative_url }}">
-  </a>
-  {%- endfor -%}
-  </div>
-  {%- endif -%}
-
-</div>
