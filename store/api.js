@@ -1,6 +1,6 @@
 
 console.log("Hostname:", window.location.hostname);
-var testMode = window.location.hostname != "orthogonaldevices.com";
+var testMode = window.location.hostname != "www.orthogonaldevices.com";
 if(testMode)
 {
   console.log("TEST MODE: active");
