@@ -102,6 +102,8 @@ function initPayPalButton() {
 }
 
 function populateTable(table, fields, records) {
+  let addButtons = records.length > 1;
+
   // Clear all rows.
   while (table.firstChild) {
     table.removeChild(table.lastChild);
@@ -116,11 +118,13 @@ function populateTable(table, fields, records) {
     th.appendChild(text);
     row.appendChild(th);
   }
-  // Add empty column for buttons.
-  let th = document.createElement("th");
-  let text = document.createTextNode("");
-  th.appendChild(text);
-  row.appendChild(th);
+  if (addButtons) {
+    // Add empty column for buttons.
+    let th = document.createElement("th");
+    let text = document.createTextNode("");
+    th.appendChild(text);
+    row.appendChild(th);
+  }
 
   // Add row for each record.
   for (let record of records) {
@@ -130,21 +134,23 @@ function populateTable(table, fields, records) {
       let text = document.createTextNode(record[field]);
       cell.appendChild(text);
     }
-    let cell = row.insertCell();
-    if (record["Item"] != "Total") {
-      let btn = document.createElement("button");
-      btn.textContent = "x";
-      btn.type = "submit";
-      btn.id = "remove-row";
-      let product = record["Item"].toLowerCase();
-      btn.addEventListener("click", event => {
-        if (common.removeFromCart(product) == 0) {
-          window.location.href = "/store";
-        } else {
-          renderCart();
-        }
-      });
-      cell.appendChild(btn);
+    if (addButtons) {
+      let cell = row.insertCell();
+      if (record["Item"] != "Total") {
+        let btn = document.createElement("button");
+        btn.textContent = "x";
+        btn.type = "submit";
+        btn.id = "remove-row";
+        let product = record["Item"].toLowerCase();
+        btn.addEventListener("click", event => {
+          if (common.removeFromCart(product) == 0) {
+            window.location.href = "/store";
+          } else {
+            renderCart();
+          }
+        });
+        cell.appendChild(btn);
+      }
     }
   }
 }
@@ -172,7 +178,7 @@ function renderCart() {
       records.push(record);
       total += price;
     });
-  } 
+  }
   records.push({
     Item: "Total",
     Qty: cart.items.length,
@@ -181,7 +187,9 @@ function renderCart() {
   console.log(records);
   let fields = ["Item", "Qty", "Amount"]
   populateTable(table, fields, records);
-  initPayPalButton();
+  if (cart.items.length > 0) {
+    initPayPalButton();
+  }
 }
 
 function initCart() {
