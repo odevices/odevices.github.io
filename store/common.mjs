@@ -164,7 +164,7 @@ export function removeFromCart(product) {
 
 export function sellCart() {
   if (cartContext) {
-    fetch(apiHost + '/cart/' + cartContext + '/sell')
+    fetch(apiHost + '/cart/' + cartContext + '/clear')
       .then(response => console.log('sell cart', cartContext, response));
   } else {
     let cart = getCart();
