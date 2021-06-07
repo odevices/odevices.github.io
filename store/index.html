@@ -2,7 +2,6 @@
 layout: default
 ---
 
-<script src="api.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <div class="cart-tab">
@@ -12,9 +11,9 @@ layout: default
   </a>
 </div>
 
-<div style="max-width:1000px;margin:auto;">
+<div class="store-content">
   <div id="store-news">
-    Sold out for June.  Another small batch of ER-101 and ER-301 coming in July.
+    Sold out for June. Another small batch of ER-101 and ER-301 coming in July.
   </div>
   <hr>
 
@@ -36,6 +35,15 @@ layout: default
     {% include product.html product="er-301-pc" %}
   </div>
 
+  <hr>
+  <h2>Store FAQ</h2>
+  <div id="store-faq">
+  {% include restock-faq.html %}
+  {% include checkout-faq.html %}
+  {% include domestic-shipping-faq.html %}
+  {% include international-shipping-faq.html %}
+  </div>
+
 </div>
 
 <div class="action-tab">
@@ -43,4 +51,4 @@ layout: default
   <button id="next" type="submit">Next</button>
 </div>
 
-<script src="store.js"></script>
+<script type="module" src="store.mjs"></script>

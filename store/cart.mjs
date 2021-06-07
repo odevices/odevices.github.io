@@ -1,5 +1,7 @@
+import * as common from "./common.mjs"
+
 function createOrder(data, actions) {
-  let cart = getCart();
+  let cart = common.getCart();
   if (cart.items.length == 0) {
     return null;
   }
@@ -8,7 +10,7 @@ function createOrder(data, actions) {
   let items = [];
 
   cart.items.forEach(p => {
-    let price = getPrice(p);
+    let price = common.getPrice(p);
     let item = {
       name: p.toUpperCase(),
       quantity: 1,
@@ -46,9 +48,6 @@ function createOrder(data, actions) {
     items: items
   }];
 
-  sessionStorage.setItem("ordered", JSON.stringify(cart));
-  sessionStorage.setItem("purchase-unit", JSON.stringify(punits[0]));
-
   return actions.order.create({
     intent: 'AUTHORIZE',
     purchase_units: punits
@@ -57,11 +56,11 @@ function createOrder(data, actions) {
 
 function onApprove(data, actions) {
   console.log("onApprove data", data);
-  sessionStorage.setItem("on-approve-data", JSON.stringify(data));
+  common.saveApproval(data);
   return actions.order.authorize().then(function (details) {
-    sellCart();
     console.log("onApprove authorize details", details);
-    sessionStorage.setItem("authorize-details", JSON.stringify(details));
+    common.saveAuthorization(details);
+    common.sellCart();
     window.location.href = "checkout-done.html";
   });
 }
@@ -71,23 +70,13 @@ function onError(err) {
   console.log("onError", err);
 }
 
-var noShippingTo = [
-  'AU', // Australia
-  'CA', // Canada
-  'IL', // Israel
-  'GR', // Greece
-  'SK', // Slovakia
-  'RO', // Romania
-  'RU', // Russia
-];
-
 function onShippingChange(data, actions) {
   console.log("onShippingChange", data);
-  if(noShippingTo.includes(data.shipping_address.country_code))
-  {
+  if (common.canShipTo(data.shipping_address.country_code)) {
+    return actions.resolve();
+  } else {
     return actions.reject();
   }
-  return actions.resolve();
 }
 
 var paypalReady = false;
@@ -112,29 +101,31 @@ function initPayPalButton() {
   paypalReady = true;
 }
 
-function generateTableHead(table, fields) {
+function populateTable(table, fields, records) {
+  // Clear all rows.
   while (table.firstChild) {
     table.removeChild(table.lastChild);
   }
+
+  // Add header row.
   let thead = table.createTHead();
   let row = thead.insertRow();
-  for (field of fields) {
+  for (let field of fields) {
     let th = document.createElement("th");
     let text = document.createTextNode(field);
     th.appendChild(text);
     row.appendChild(th);
   }
-  // empty column for buttons
+  // Add empty column for buttons.
   let th = document.createElement("th");
   let text = document.createTextNode("");
   th.appendChild(text);
   row.appendChild(th);
-}
 
-function generateTable(table, fields, records) {
-  for (record of records) {
+  // Add row for each record.
+  for (let record of records) {
     let row = table.insertRow();
-    for (field of fields) {
+    for (let field of fields) {
       let cell = row.insertCell();
       let text = document.createTextNode(record[field]);
       cell.appendChild(text);
@@ -147,7 +138,7 @@ function generateTable(table, fields, records) {
       btn.id = "remove-row";
       let product = record["Item"].toLowerCase();
       btn.addEventListener("click", event => {
-        if (removeFromCart(product) == 0) {
+        if (common.removeFromCart(product) == 0) {
           window.location.href = "/store";
         } else {
           renderCart();
@@ -159,48 +150,55 @@ function generateTable(table, fields, records) {
 }
 
 function renderCart() {
-  let cart = getCart();
-  let table = document.querySelector(".cart-table");
-
-  if (apiCache.inventory == null || apiCache.prices == null) {
-
+  let email = common.getCartContext();
+  let title = document.querySelector("#cart-title");
+  if (email) {
+    title.innerHTML = "Shopping Cart for " + email;
   } else {
-    if (cart.items.length > 0) {
-      let records = [];
-      let total = 0;
-      cart.items.forEach(p => {
-        let price = getPrice(p);
-        let record = {
-          Item: p.toUpperCase(),
-          Qty: 1,
-          Amount: formatPrice(price, prefix = 'symbol'),
-        };
-        records.push(record);
-        total += price;
-      });
-      records.push({
-        Item: "Total",
-        Qty: cart.items.length,
-        Amount: formatPrice(total),
-      });
-      console.log(records);
-      let fields = ["Item", "Qty", "Amount"]
-      generateTableHead(table, fields);
-      generateTable(table, fields, records);
-      initPayPalButton();
-    } else {
-
-    }
+    title.innerHTML = "Your Shopping Cart";
   }
+  let cart = common.getCart();
+  let table = document.querySelector(".cart-table");
+  let records = [];
+  let total = 0;
+  if (common.hasPrices() && cart.items.length > 0) {
+    cart.items.forEach(p => {
+      let price = common.getPrice(p);
+      let record = {
+        Item: p.toUpperCase(),
+        Qty: 1,
+        Amount: common.formatPrice(price, 'symbol'),
+      };
+      records.push(record);
+      total += price;
+    });
+  } 
+  records.push({
+    Item: "Total",
+    Qty: cart.items.length,
+    Amount: common.formatPrice(total),
+  });
+  console.log(records);
+  let fields = ["Item", "Qty", "Amount"]
+  populateTable(table, fields, records);
+  initPayPalButton();
 }
 
 function initCart() {
-  if (isCartEmpty()) {
-    window.location.href = "/store";
-    return;
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const email = urlParams.get("email");
+  if (email) {
+    common.setCartContext(email);
+  } else {
+    common.setCartContext(null);
+    if (common.isCartEmpty()) {
+      console.log("Cart is empty. Returning to store.");
+      window.location.href = "/store";
+      return;
+    }
   }
-  renderCart();
-  refreshInventory(renderCart);
+  common.refreshCache().then(renderCart);
 }
 
 initCart();

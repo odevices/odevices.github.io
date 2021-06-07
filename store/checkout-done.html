@@ -1,7 +1,6 @@
 ---
 layout: default
 ---
-<script src="api.js"></script>
 
 <div class="store-content">
 
@@ -17,19 +16,17 @@ layout: default
         <li>The payment has only been authorized.</li>
         <li>You will be charged when your order is ready to ship.</li>
         <li>You should receive a receipt via email from <b>PAYPAL.COM</b> soon.</li>
-        <li>This order will ship within 1-2 weeks.</li>
       </ul>
-
-      International Buyers:<br>
-      <ul>
-        <li>Shipments are fulfilled by EMS and fully insured.</li>
-        <li>Signature will be required for delivery.</li>
-        <li>You must pay duty and import tax when the package is delivered.</li>
-      </ul>
+      <div id="domestic-shipping-faq" style="visibility:hidden;">
+        {% include domestic-shipping-faq.html %}
+      </div>
+      <div id="international-shipping-faq" style="visibility:hidden;">
+        {% include international-shipping-faq.html %}
+      </div>
     </div>
 
   </div>
 
 </div>
 
-<script src="checkout-done.js"></script>
+<script type="module" src="checkout-done.mjs"></script>

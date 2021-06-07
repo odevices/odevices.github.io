@@ -2,22 +2,29 @@
 layout: default
 ---
 
-<script src="api.js"></script>
-<script src="https://www.paypal.com/sdk/js?client-id=ATRHCDO7mBNOSkRSDeXO1K_zaMuwqucuQreUSv5lAcdRMx5fDN4Y7YpCxJpLwWaB5lsoof293MPst3ff&currency=JPY&intent=authorize"
+<script
+  src="https://www.paypal.com/sdk/js?client-id=ATRHCDO7mBNOSkRSDeXO1K_zaMuwqucuQreUSv5lAcdRMx5fDN4Y7YpCxJpLwWaB5lsoof293MPst3ff&currency=JPY&intent=authorize"
   data-sdk-integration-source="button-factory"></script>
 
 <div class="store-content">
+  <h2 id="cart-title">Loading your cart...</h2>
+  <a style="float:right;" href="/store">[Back to Store]</a><br>
   <table class="cart-table">
   </table>
-</div>
 
-<div style="text-align: center;">Orders are shipped within 1-2 weeks.</div>
+  <div id="smart-button-container" style="max-width:400px;margin:auto;">
+    <div style="text-align: center;">
+      <div id="paypal-button-container"></div>
+    </div>
+  </div>
 
-<div id="smart-button-container" style="max-width:400px;margin:auto;">
-  <div style="text-align: center;">
-    <div id="paypal-button-container"></div>
-    <a href="/store">[Back to Store]</a><br>
+  <hr>
+  <h2>Store FAQ</h2>
+  <div id="store-faq">
+  {% include restock-faq.html %}
+  {% include checkout-faq.html %}
+  {% include domestic-shipping-faq.html %}
+  {% include international-shipping-faq.html %}
   </div>
 </div>
-
-<script src="cart.js"></script>
+<script type="module" src="cart.mjs"></script>

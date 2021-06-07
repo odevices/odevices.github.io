@@ -1,10 +1,12 @@
 
+import * as common from "./common.mjs"
+
 function getProduct(e) {
   return e.closest(".product").dataset.product;
 }
 
 function renderStore() {
-  let cart = getCart();
+  let cart = common.getCart();
   console.log("cart: " + JSON.stringify(cart));
   let e = document.querySelector(".cart-count")
   e.innerHTML = cart.items.length;
@@ -18,27 +20,16 @@ function renderStore() {
     document.querySelector("#next").disabled = true;
   }
 
-  if (apiCache.inventory == null || apiCache.prices == null) {
-    let elts = document.querySelectorAll(".product")
-    elts.forEach(e => {
-      let priceDiv = e.querySelector("#price");
-      let button = e.querySelector("#action");
-      let count = e.querySelector(".product-count");
-      priceDiv.innerHTML = "";
-      button.disabled = true;
-      button.innerHTML = "Checking...";
-      count.style.visibility = "hidden";
-    });
-  } else {
+  if (common.hasInventory() && common.hasPrices()) {
     let elts = document.querySelectorAll(".product")
     elts.forEach(e => {
       let product = e.dataset.product;
-      let price = getPrice(product);
-      let stock = getInventory(product);
+      let price = common.getPrice(product);
+      let stock = common.getInventory(product);
       let priceDiv = e.querySelector("#price");
       let button = e.querySelector("#action");
       let count = e.querySelector(".product-count");
-      priceDiv.innerHTML = formatPrice(price);
+      priceDiv.innerHTML = common.formatPrice(price);
       if (cart.items.includes(product)) {
         button.disabled = false;
         button.innerHTML = "Remove";
@@ -56,17 +47,28 @@ function renderStore() {
         count.innerHTML = "0";
       }
     });
+  } else {
+    let elts = document.querySelectorAll(".product")
+    elts.forEach(e => {
+      let priceDiv = e.querySelector("#price");
+      let button = e.querySelector("#action");
+      let count = e.querySelector(".product-count");
+      priceDiv.innerHTML = "";
+      button.disabled = true;
+      button.innerHTML = "Checking...";
+      count.style.visibility = "hidden";
+    });
   }
 }
 
 function initStore() {
-  refreshInventory(renderStore);
+  common.refreshCache().then(renderStore);
 
   let clearButton = document.querySelector("#clear");
   clearButton.addEventListener("click", event => {
-    clearCart();
-    refreshInventory(renderStore);
+    common.clearCart();
     renderStore();
+    common.refreshCache().then(renderStore);
   });
 
   let nextButton = document.querySelector("#next");
@@ -89,9 +91,9 @@ function initStore() {
     button.addEventListener("click", event => {
       let product = getProduct(button);
       if(button.innerHTML=="Add to Cart"){
-        addToCart(product);
+        common.addToCart(product);
       } else {
-        removeFromCart(product);
+        common.removeFromCart(product);
       }
       renderStore();
     });
