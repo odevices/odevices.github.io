@@ -56,8 +56,5 @@ exclude:
   - notes.md
 
 collections:
-  modules:
-    sort_by: title
-    output: true
   zooms:
     output: true

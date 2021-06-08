@@ -4,14 +4,17 @@ layout: default
 
 <div class="home">
 
-  {%- if site.modules.size > 0 -%}
   <div>
-  {%- for module in site.modules -%}
-  <a href="{{ module.url | relative_url }}">
-    <img style="margin:5px" src="{{ module.image | relative_url }}">
-  </a>
-  {%- endfor -%}
+
+    <a href="/er-101">
+      <img style="margin:5px" src="/images/er-101-original-flavor.png">
+    </a>
+    <a href="/er-102">
+      <img style="margin:5px" src="/images/er-102-original-flavor.jpg">
+    </a>
+    <a href="/er-301">
+      <img style="margin:5px" src="/images/er-301-original-flavor.png">
+    </a>
   </div>
-  {%- endif -%}
 
 </div>
