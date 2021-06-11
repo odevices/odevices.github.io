@@ -202,11 +202,11 @@ export function refreshCache() {
 
 export function saveApproval(data) {
   let x = JSON.stringify(data);
-  sessionStorage.setItem("on-approve-data", x);
+  localStorage.setItem("on-approve-data", x);
 }
 
 export function getLastApproval() {
-  let x = sessionStorage.getItem("on-approve-data");
+  let x = localStorage.getItem("on-approve-data");
   if (x) {
     x = JSON.parse(x);
   }
@@ -215,11 +215,11 @@ export function getLastApproval() {
 
 export function saveAuthorization(data) {
   let x = JSON.stringify(data);
-  sessionStorage.setItem("authorization-details", x);
+  localStorage.setItem("authorization-details", x);
 }
 
 export function getLastAuthorization() {
-  let x = sessionStorage.getItem("authorization-details");
+  let x = localStorage.getItem("authorization-details");
   if (x) {
     x = JSON.parse(x);
   }
