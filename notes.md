@@ -13,3 +13,14 @@ Get path to theme files:
 
 bundle info --path minima
 
+# Keeping track of inventory
+
+The store flow:
+
+update cart
+renderCart
+createOrder (hold inventory)
+onApprove 
+actions.order.authorize success (mark inventory sold)
+onError (release inventory)
+onShippingChange

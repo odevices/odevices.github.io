@@ -1,6 +1,5 @@
 
 console.log("Hostname:", window.location.hostname);
-export var cartContext = null;
 
 export var testMode = window.location.hostname != "www.orthogonaldevices.com";
 if (testMode) {
@@ -15,7 +14,7 @@ if (testMode) {
 
 var apiCache = {
   cart: null,
-  inventory: null,
+  inStock: null,
   prices: {
     "er-101-n": 66000,
     "er-101-pc": 66000,
@@ -33,7 +32,6 @@ var apiCache = {
 var noShippingTo = [
   'AU', // Australia
   'CA', // Canada
-  'IL', // Israel
   'GR', // Greece
   'SK', // Slovakia
   'RO', // Romania
@@ -44,32 +42,49 @@ export function canShipTo(country) {
   return !noShippingTo.includes(country);
 }
 
-export function setCartContext(token) {
-  if (token) {
-    console.log("Cart Context: ", token);
+function uuidv4() {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
+
+function uuidv4_unsafe() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+export function overrideApiKey(key) {
+  if (key == null) {
+    sessionStorage.removeItem("apiKeyOverride");
   } else {
-    console.log("Cart Context: session");
+    sessionStorage.setItem("apiKeyOverride", key);
   }
-  cartContext = token;
 }
 
-export function getCartContext() {
-  return cartContext;
-}
-
-export function hasInventory() {
-  return apiCache.inventory !== null;
-}
-
-export function hasPrices() {
-  return apiCache.prices !== null;
-}
-
-export function getInventory(product) {
-  if (apiCache.prices == null || apiCache.inventory == null) {
-    return 0;
+export function getApiKey() {
+  let key = sessionStorage.getItem("apiKeyOverride");
+  if (key == null) {
+    key = localStorage.getItem("apiKey");
+    if (key == null) {
+      key = uuidv4();
+      console.log("created apiKey: " + key)
+      localStorage.setItem("apiKey", key);
+    } else {
+      console.log("apiKey: " + key);
+    }
+  } else {
+    console.log("apiKey overridden: " + key);
   }
-  return apiCache.inventory[product];
+  return key;
+}
+
+export function isInStock(product) {
+  if (apiCache.inStock == null) {
+    return false;
+  }
+  return apiCache.inStock.includes(product);
 }
 
 export function getPrice(product) {
@@ -96,108 +111,92 @@ export function formatPrice(number, prefix = 'code') {
   });
 }
 
-export function clearCart() {
-  if (cartContext) {
-    apiCache.cart = null;
-  } else {
-    sessionStorage.removeItem("cart");
-    console.log("Cart cleared.")
-  }
-}
-
 export function isCartEmpty() {
-  return sessionStorage.getItem("cart") == null;
+  if (apiCache.cart == null) {
+    return true;
+  }
+
+  return apiCache.cart.length == 0;
 }
 
 export function getCart() {
-  if (cartContext) {
-    if (apiCache.cart) {
-      return apiCache.cart;
-    } else {
-      return {
-        items: [],
-      }
-    }
+  if (apiCache.cart == null)
+    return [];
+  return apiCache.cart;
+}
+
+function myFetch(url) {
+  console.log("fetch: " + url);
+  return fetch(url);
+}
+
+function onReceiveApiState(data) {
+  console.log("received api state", data);
+  if (data.cart == null) {
+    console.log("cart is missing from api state");
   } else {
-    let data = sessionStorage.getItem("cart");
-    if (data == null) {
-      return {
-        items: [],
-      }
-    }
-    let cart = JSON.parse(data);
-    let tmp = JSON.parse(data);
-    tmp.items.forEach(p => {
-      if (getInventory(p) < 1) {
-        cart.items = cart.items.filter(e => e !== p);
-      }
-    });
-    return cart;
+    apiCache.cart = data.cart;
+  }
+  if (data.inStock == null) {
+    console.log("inStock is missing from api state");
+  } else {
+    apiCache.inStock = data.inStock;
+  }
+  if (data.prices) {
+    apiCache.prices = data.prices;
   }
 }
 
-function setCart(cart) {
-  if (cartContext) {
-    apiCache.cart = cart;
-  } else {
-    sessionStorage.setItem("cart", JSON.stringify(cart));
+export function clearCart() {
+  if (isCartEmpty()) {
+    return Promise.resolve("Cart is already empty.");
   }
+  return myFetch(apiHost + '/user/clearCart/' + getApiKey())
+    .then(response => response.json())
+    .then(data => onReceiveApiState(data));
 }
 
 export function addToCart(product) {
-  if (cartContext) {
-    // do nothing
-  } else {
-    var cart = getCart();
-    cart.items.push(product);
-    setCart(cart);
+  let cart = getCart();
+  if (cart.includes(product)) {
+    return Promise.resolve('Already in cart.');
   }
+  return myFetch(apiHost + '/user/addToCart/' + getApiKey() + '/' + product)
+    .then(response => response.json())
+    .then(data => onReceiveApiState(data));
 }
 
 export function removeFromCart(product) {
   let cart = getCart();
-  console.log("Remove " + product + " from cart.")
-  cart.items = cart.items.filter(e => e !== product);
-  setCart(cart);
-  return cart.items.length;
+  if (!cart.includes(product)) {
+    return Promise.resolve('Already removed from cart.');
+  }
+  return myFetch(apiHost + '/user/removeFromCart/' + getApiKey() + '/' + product)
+    .then(response => response.json())
+    .then(data => onReceiveApiState(data));
 }
 
 export function sellCart() {
-  if (cartContext) {
-    fetch(apiHost + '/cart/' + cartContext + '/clear')
-      .then(response => console.log('sell cart', cartContext, response));
+  if (isCartEmpty()) {
+    return Promise.resolve("Nothing to sell.");
+  }
+  return myFetch(apiHost + '/user/sellCart/' + getApiKey())
+    .then(response => response.json())
+    .then(data => onReceiveApiState(data));
+}
+
+export function refreshApiState() {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const email = urlParams.get("email");
+  if (email) {
+    overrideApiKey(email);
   } else {
-    let cart = getCart();
-    cart.items.forEach(p => {
-      fetch(apiHost + '/sell/' + p)
-        .then(response => console.log('sell', p, response));
-    });
+    overrideApiKey(null);
   }
-  clearCart();
-}
-
-function onReceiveCart(data) {
-  console.log("received cart for", cartContext, data);
-  apiCache.cart = {
-    items: data,
-  }
-}
-
-function onReceiveInventory(data) {
-  console.log("received inventory", data);
-  apiCache.inventory = data;
-}
-
-export function refreshCache() {
-  if (cartContext) {
-    return fetch(apiHost + '/cart/' + cartContext)
-      .then(response => response.json())
-      .then(data => onReceiveCart(data));
-  } else {
-    return fetch(apiHost + '/inventory')
-      .then(response => response.json())
-      .then(data => onReceiveInventory(data));
-  }
+  return myFetch(apiHost + '/user/getState/' + getApiKey())
+    .then(response => response.json())
+    .then(data => onReceiveApiState(data));
 }
 
 export function saveApproval(data) {

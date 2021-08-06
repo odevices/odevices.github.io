@@ -2,14 +2,14 @@ import * as common from "./common.mjs"
 
 function createOrder(data, actions) {
   let cart = common.getCart();
-  if (cart.items.length == 0) {
+  if (cart.length == 0) {
     return null;
   }
 
   let total = 0;
   let items = [];
 
-  cart.items.forEach(p => {
+  cart.forEach(p => {
     let price = common.getPrice(p);
     let item = {
       name: p.toUpperCase(),
@@ -54,14 +54,17 @@ function createOrder(data, actions) {
   });
 }
 
+function onCheckoutDone() {
+  window.location.href = "checkout-done.html";
+}
+
 function onApprove(data, actions) {
   console.log("onApprove data", data);
   common.saveApproval(data);
   return actions.order.authorize().then(function (details) {
     console.log("onApprove authorize details", details);
     common.saveAuthorization(details);
-    common.sellCart();
-    window.location.href = "checkout-done.html";
+    common.sellCart().then(onCheckoutDone);
   });
 }
 
@@ -143,11 +146,7 @@ function populateTable(table, fields, records) {
         btn.id = "remove-row";
         let product = record["Item"].toLowerCase();
         btn.addEventListener("click", event => {
-          if (common.removeFromCart(product) == 0) {
-            window.location.href = "/store";
-          } else {
-            renderCart();
-          }
+          common.removeFromCart(product).then(renderCart);
         });
         cell.appendChild(btn);
       }
@@ -156,19 +155,21 @@ function populateTable(table, fields, records) {
 }
 
 function renderCart() {
-  let email = common.getCartContext();
-  let title = document.querySelector("#cart-title");
-  if (email) {
-    title.innerHTML = "Shopping Cart for " + email;
-  } else {
-    title.innerHTML = "Your Shopping Cart";
+  if (common.isCartEmpty()) {
+    console.log("Cart is empty. Returning to store.");
+    window.location.href = "/store";
+    return;
   }
+
+  let title = document.querySelector("#cart-title");
   let cart = common.getCart();
+  title.innerHTML = "Your Shopping Cart";
+
   let table = document.querySelector(".cart-table");
   let records = [];
   let total = 0;
-  if (common.hasPrices() && cart.items.length > 0) {
-    cart.items.forEach(p => {
+  if (cart.length > 0) {
+    cart.forEach(p => {
       let price = common.getPrice(p);
       let record = {
         Item: p.toUpperCase(),
@@ -181,34 +182,16 @@ function renderCart() {
   }
   records.push({
     Item: "Total",
-    Qty: cart.items.length,
+    Qty: cart.length,
     Amount: common.formatPrice(total),
   });
   console.log(records);
   let fields = ["Item", "Qty", "Amount"]
   populateTable(table, fields, records);
-  if (cart.items.length > 0) {
+  if (cart.length > 0) {
     initPayPalButton();
   }
 }
 
-function initCart() {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const email = urlParams.get("email");
-  if (email) {
-    common.setCartContext(email);
-  } else {
-    common.setCartContext(null);
-    if (common.isCartEmpty()) {
-      console.log("Cart is empty. Returning to store.");
-      window.location.href = "/store";
-      return;
-    }
-  }
-  common.refreshCache().then(renderCart);
-}
-
-initCart();
-
+common.refreshApiState().then(renderCart);
 
